@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
     <title>Diccionario de Acordes</title>
+    <!-- Enlaces obligatorios para la instalación PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icono.png">
     <style>
         html, body {
             background-color: #000000; color: #ffffff;
@@ -169,7 +173,7 @@
     </div>
 
     <script>
-      // --- 1. LOGIN CENTRALIZADO (MISMO EXCEL QUE ARMONÍA) ---
+        // --- 1. LOGIN CENTRALIZADO (MISMO EXCEL DE ARMONÍA) ---
         const URL_RECEPCIONISTA = "https://script.google.com/macros/s/AKfycbx6-2gfl9UGXOi5CQDaEC55_89hsRflJGF8DyiC9jz4hw82mhMaEmeK99Y4VxOKoVW6/exec";
 
         function obtenerDeviceID() {
@@ -229,6 +233,7 @@
                 entrarApp();
             }
         };
+
         // --- 2. LÓGICA MUSICAL Y CAGED EXPANDIDO ---
         const NOTAS = ['C','C#','D','Eb','E','F','F#','G','G#','A','Bb','B'];
         let notaActual = 'C';
@@ -238,14 +243,13 @@
 
         const AFINACION = { 6: 'E', 5: 'A', 4: 'D', 3: 'G' }; 
 
-        // Diccionario expandido con formas C y G para tener 5 posiciones base
         const DICCIONARIO = {
             "Mayor": [
-                { rStr: 6, frets: [0, 2, 2, 1, 0, 0], fingers: [1, 3, 4, 2, 1, 1] }, // Forma E
-                { rStr: 5, frets: ['x', 0, 2, 2, 2, 0], fingers: ['x', 1, 2, 3, 4, 1] }, // Forma A
-                { rStr: 4, frets: ['x', 'x', 0, 2, 3, 2], fingers: ['x', 'x', 1, 2, 4, 3] }, // Forma D
-                { rStr: 5, frets: ['x', 3, 2, 0, 1, 0], fingers: ['x', 3, 2, 0, 1, 0], offset: -3 }, // Forma C (requiere offset lógico)
-                { rStr: 6, frets: [3, 2, 0, 0, 0, 3], fingers: [3, 2, 0, 0, 0, 4], offset: -3 }  // Forma G
+                { rStr: 6, frets: [0, 2, 2, 1, 0, 0], fingers: [1, 3, 4, 2, 1, 1] },
+                { rStr: 5, frets: ['x', 0, 2, 2, 2, 0], fingers: ['x', 1, 2, 3, 4, 1] },
+                { rStr: 4, frets: ['x', 'x', 0, 2, 3, 2], fingers: ['x', 'x', 1, 2, 4, 3] },
+                { rStr: 5, frets: ['x', 3, 2, 0, 1, 0], fingers: ['x', 3, 2, 0, 1, 0], offset: -3 },
+                { rStr: 6, frets: [3, 2, 0, 0, 0, 3], fingers: [3, 2, 0, 0, 0, 4], offset: -3 }
             ],
             "m": [
                 { rStr: 6, frets: [0, 2, 2, 0, 0, 0], fingers: [1, 3, 4, 1, 1, 1] },
@@ -256,20 +260,19 @@
                 { rStr: 6, frets: [0, 2, 0, 1, 0, 0], fingers: [1, 3, 1, 2, 1, 1] },
                 { rStr: 5, frets: ['x', 0, 2, 0, 2, 0], fingers: ['x', 1, 3, 1, 4, 1] },
                 { rStr: 4, frets: ['x', 'x', 0, 2, 1, 2], fingers: ['x', 'x', 1, 3, 2, 4] },
-                { rStr: 5, frets: ['x', 3, 2, 3, 1, 0], fingers: ['x', 3, 2, 4, 1, 0], offset: -3 } // Forma C7
+                { rStr: 5, frets: ['x', 3, 2, 3, 1, 0], fingers: ['x', 3, 2, 4, 1, 0], offset: -3 }
             ],
             "maj7": [
                 { rStr: 6, frets: [0, 'x', 1, 1, 0, 'x'], fingers: [1, 'x', 3, 4, 2, 'x'] },
                 { rStr: 5, frets: ['x', 0, 2, 1, 2, 0], fingers: ['x', 1, 3, 2, 4, 1] },
                 { rStr: 4, frets: ['x', 'x', 0, 2, 2, 2], fingers: ['x', 'x', 1, 2, 3, 4] },
-                { rStr: 5, frets: ['x', 3, 2, 0, 0, 0], fingers: ['x', 3, 2, 0, 0, 0], offset: -3 } // Forma Cmaj7
+                { rStr: 5, frets: ['x', 3, 2, 0, 0, 0], fingers: ['x', 3, 2, 0, 0, 0], offset: -3 }
             ],
             "m7": [
                 { rStr: 6, frets: [0, 2, 0, 0, 0, 0], fingers: [1, 3, 1, 1, 1, 1] },
                 { rStr: 5, frets: ['x', 0, 2, 0, 1, 0], fingers: ['x', 1, 3, 1, 2, 1] },
                 { rStr: 4, frets: ['x', 'x', 0, 2, 1, 1], fingers: ['x', 'x', 1, 3, 2, 2] }
             ],
-            // El resto de los acordes de tensión mantienen las 2-3 posiciones más tocables
             "aug": [
                 { rStr: 6, frets: [0, 'x', 2, 1, 1, 'x'], fingers: [1, 'x', 4, 2, 3, 'x'] },
                 { rStr: 5, frets: ['x', 0, 3, 2, 2, 'x'], fingers: ['x', 1, 4, 2, 3, 'x'] }
@@ -398,23 +401,17 @@
             formulas.forEach(forma => {
                 let trasteBase = calcularTrasteRaiz(notaActual, forma.rStr);
                 
-                // Si la forma tiene un offset (ej. forma de C que arranca 3 trastes antes de su raíz)
                 if (forma.offset) trasteBase += forma.offset;
-                
-                if (trasteBase < 0) trasteBase += 12; // Evitar trastes negativos
+                if (trasteBase < 0) trasteBase += 12; 
 
-                // Excepciones para acordes al aire
                 if (trasteBase === 12) trasteBase = 0; 
                 if (forma.offset === undefined && notaActual === AFINACION[forma.rStr]) trasteBase = 0;
 
                 let trastesCalculados = forma.frets.map((f, i) => {
                     if (f === 'x') return 'x';
-                    // Si el dedo teórico es 0 (al aire en la forma base), y estamos tocando en otro traste, ese dedo pasa a formar parte de la cejilla
-                    let tFret = f + trasteBase;
-                    return tFret;
+                    return f + trasteBase;
                 });
                 
-                // FILTRO: Si el cálculo da un traste negativo (pasa en formas raras en traste 0), lo ignoramos o subimos de octava.
                 let tieneNegativos = trastesCalculados.some(t => t !== 'x' && t < 0);
                 if (tieneNegativos) {
                     trastesCalculados = trastesCalculados.map(t => t === 'x' ? 'x' : t + 12);
@@ -428,21 +425,18 @@
                 });
             });
 
-            // --- SISTEMA DE ORDENAMIENTO INTELIGENTE (De más fácil a más difícil) ---
             variantesActuales.sort((a, b) => {
                 let minA = Math.min(...a.trastes.filter(t => t !== 'x' && t > 0));
                 let minB = Math.min(...b.trastes.filter(t => t !== 'x' && t > 0));
                 if (minA === Infinity) minA = 0;
                 if (minB === Infinity) minB = 0;
                 
-                // Prioridad a acordes al aire
                 if (a.esAlAire && !b.esAlAire) return -1;
                 if (!a.esAlAire && b.esAlAire) return 1;
 
                 return minA - minB;
             });
 
-            // Borrar duplicados si hay (por cruce matemático de CAGED)
             variantesActuales = variantesActuales.filter((v, i, a) => 
                 a.findIndex(t => JSON.stringify(t.trastes) === JSON.stringify(v.trastes)) === i
             );
@@ -522,16 +516,13 @@
                 svg.appendChild(textoFret);
             }
 
-            // CEJILLAS BARRADAS
             let barres = {};
             trastes.forEach((trasteVal, strIdx) => {
                 if(trasteVal !== 'x' && trasteVal > 0) {
                     let relativeFret = trasteVal - startFret;
-                    // Lógica para saber si esta cuerda forma parte de la cejilla base
                     let dedoTeorico = data.fingers[strIdx];
                     let trasteTeorico = data.fretOriginales[strIdx];
                     
-                    // Si el acorde se movió de traste y la cuerda original era 0, ahora la pisa el dedo 1
                     let dedoReal = dedoTeorico;
                     if (!data.esAlAire && trasteTeorico === 0) dedoReal = 1;
 
@@ -565,7 +556,6 @@
                 }
             }
 
-            // PUNTOS Y DEDOS
             trastes.forEach((trasteVal, index) => {
                 let x = index * stringSpacing;
                 
