@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <title>Diccionario de Acordes</title>
+    <style>
+        html, body {
+            background-color: #000000; color: #ffffff;
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0; padding: 0; overflow-x: hidden; 
+            user-select: none; -webkit-user-select: none;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.8), 0 0 5px rgba(0, 243, 255, 0.4);
+            font-size: 2.5em; font-weight: 900; text-align: center;
+            margin-top: 40px; letter-spacing: 3px;
+        }
+        h1 span {
+            color: #00f3ff; display: block; font-size: 0.5em;
+            letter-spacing: 6px; margin-top: 5px;
+        }
+
+        .pantalla { display: none; width: 100vw; min-height: 100vh; flex-direction: column; align-items: center; background-color: #000000; padding-bottom: 40px; }
+        .activa { display: flex; }
+
+        .btn-principal {
+            background-color: rgba(255, 255, 255, 0.03); border: 1px solid;
+            padding: 15px 30px; margin: 10px; font-size: 1.1em; font-weight: 700;
+            cursor: pointer; border-radius: 8px; transition: 0.3s;
+            width: 85%; max-width: 380px; text-transform: uppercase; letter-spacing: 2px;
+        }
+        .btn-fucsia { color: #ff00ff; border-color: rgba(255, 0, 255, 0.5); box-shadow: 0 4px 15px rgba(255, 0, 255, 0.1); }
+        .btn-fucsia:active { background-color: #ff00ff; color: #000; box-shadow: 0 0 25px rgba(255, 0, 255, 0.6); }
+
+        .input-cyber {
+            width: 90%; max-width: 420px; padding: 15px;
+            background-color: #0d0d0d; color: #fff; border: 1px solid #333;
+            border-radius: 10px; font-size: 1.1em; margin-bottom: 20px;
+            outline: none; box-sizing: border-box;
+        }
+        select.input-cyber {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ff00ff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat; background-position: right 20px top 50%; background-size: 15px auto;
+        }
+        .input-cyber:focus { border-color: #ff00ff; box-shadow: 0 0 10px rgba(255,0,255,0.2); }
+
+        .grid-notas {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+            width: 90%; max-width: 420px; margin-bottom: 25px;
+        }
+        .nota {
+            background: #111; border: 1px solid #222; color: #888;
+            padding: 15px 0; text-align: center; font-size: 1.2em; font-weight: bold;
+            border-radius: 8px; cursor: pointer; transition: 0.2s;
+        }
+        .nota.seleccionada {
+            background: #2a002a; color: #ff00ff; border-color: #ff00ff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3); text-shadow: 0 0 8px #ff00ff;
+        }
+
+        .visor-acorde {
+            width: 100%; max-width: 400px;
+            background: #0a0a0a; border: 1px solid #222; border-radius: 15px;
+            padding: 20px; box-sizing: border-box;
+            display: flex; flex-direction: column; align-items: center; margin-top: 10px;
+        }
+        .titulo-acorde {
+            font-size: 2.2em; font-weight: 900; color: #00f3ff;
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.5); margin-bottom: 20px; letter-spacing: 2px;
+        }
+        
+        .controles-variantes {
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; margin-bottom: 20px;
+        }
+        .btn-flecha {
+            background: none; border: 1px solid #444; color: #fff; font-size: 1.5em;
+            width: 45px; height: 45px; border-radius: 50%; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .btn-flecha:active { background: #333; }
+        .texto-variante { color: #aaa; font-weight: bold; letter-spacing: 1px; font-size: 0.9em; }
+
+        #svg-mastil { width: 100%; max-width: 280px; height: auto; overflow: visible; }
+    </style>
+</head>
+<body>
+
+    <!-- ================= LOGIN ================= -->
+    <div id="pantalla-login" class="pantalla activa">
+        <h1>DICCIONARIO<span>DE ACORDES</span></h1>
+        <div style="margin-top: 40px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <p style="color: #777; width: 90%; max-width: 420px; text-align: center; margin-bottom: 20px;">
+                Ingresá tu correo para validar tu licencia vitalicia.
+            </p>
+            <input type="email" id="input-email-login" class="input-cyber" placeholder="tu@correo.com">
+            <button class="btn-principal btn-fucsia" onclick="intentarActivar()">ACTIVAR</button>
+            <p id="mensaje-login" style="color: red; font-weight: bold; margin-top: 15px;"></p>
+        </div>
+    </div>
+
+    <!-- ================= APP PRINCIPAL ================= -->
+    <div id="pantalla-app" class="pantalla" style="padding-top: 30px;">
+        
+        <h2 style="color: #fff; font-weight: 300; letter-spacing: 2px; font-size: 1.2em; margin-bottom: 10px;">1. TONALIDAD</h2>
+        <div class="grid-notas" id="grid-notas"></div>
+
+        <h2 style="color: #fff; font-weight: 300; letter-spacing: 2px; font-size: 1.2em; margin-bottom: 10px;">2. ESTRUCTURA</h2>
+        <select id="select-tipo" class="input-cyber" onchange="actualizarAcorde()">
+            <optgroup label="Básicos">
+                <option value="Mayor">Mayor</option>
+                <option value="m">Menor (m)</option>
+                <option value="aug">Aumentado (aug)</option>
+                <option value="dim">Disminuido (dim)</option>
+            </optgroup>
+            <optgroup label="Suspendidos e Incompletos">
+                <option value="sus4">Suspendido 4 (sus4)</option>
+                <option value="sus2">Suspendido 2 (sus2)</option>
+                <option value="5">Power Chord (5)</option>
+            </optgroup>
+            <optgroup label="Séptimas">
+                <option value="7">Séptima Dominante (7)</option>
+                <option value="maj7">Séptima Mayor (maj7)</option>
+                <option value="m7">Menor Séptima (m7)</option>
+                <option value="mMaj7">Menor Séptima Mayor (mMaj7)</option>
+                <option value="m7b5">Semidisminuido (m7b5)</option>
+                <option value="dim7">Disminuido 7 (dim7)</option>
+                <option value="aug7">Aumentado 7 (aug7)</option>
+            </optgroup>
+            <optgroup label="Sextas y Añadidas">
+                <option value="6">Sexta Mayor (6)</option>
+                <option value="m6">Menor Sexta (m6)</option>
+                <option value="add9">Add 9 (add9)</option>
+                <option value="6/9">Sexta y Novena (6/9)</option>
+            </optgroup>
+            <optgroup label="Extendidos">
+                <option value="9">Dominante 9 (9)</option>
+                <option value="maj9">Mayor 9 (maj9)</option>
+                <option value="m9">Menor 9 (m9)</option>
+                <option value="11">Oncena (11)</option>
+                <option value="13">Trecena (13)</option>
+            </optgroup>
+            <optgroup label="Alterados">
+                <option value="7b5">7b5</option>
+                <option value="7#5">7#5</option>
+                <option value="7b9">7b9</option>
+                <option value="7#9">7#9</option>
+            </optgroup>
+        </select>
+
+        <div class="visor-acorde">
+            <div class="titulo-acorde" id="titulo-visor">C Mayor</div>
+            
+            <div class="controles-variantes">
+                <button class="btn-flecha" onclick="cambiarVariante(-1)">&#8592;</button>
+                <div class="texto-variante" id="texto-posicion">POSICIÓN 1 / 3</div>
+                <button class="btn-flecha" onclick="cambiarVariante(1)">&#8594;</button>
+            </div>
+
+            <svg id="svg-mastil" viewBox="-30 -30 300 340"></svg>
+        </div>
+    </div>
+
+    <script>
+      // --- 1. LOGIN CENTRALIZADO (MISMO EXCEL QUE ARMONÍA) ---
+        const URL_RECEPCIONISTA = "https://script.google.com/macros/s/AKfycbx6-2gfl9UGXOi5CQDaEC55_89hsRflJGF8DyiC9jz4hw82mhMaEmeK99Y4VxOKoVW6/exec";
+
+        function obtenerDeviceID() {
+            let id = localStorage.getItem('diccionario_device_id');
+            if (!id) {
+                id = crypto.randomUUID ? crypto.randomUUID() : 'id-' + Math.random().toString(36).substring(2, 15);
+                localStorage.setItem('diccionario_device_id', id);
+            }
+            return id;
+        }
+
+        async function intentarActivar() {
+            let email = document.getElementById('input-email-login').value.trim();
+            let msj = document.getElementById('mensaje-login');
+
+            if (!email) {
+                msj.innerText = "Por favor, ingresá un correo.";
+                msj.style.color = "red";
+                return;
+            }
+
+            msj.innerText = "Conectando con el servidor...";
+            msj.style.color = "#00f3ff";
+
+            let deviceID = obtenerDeviceID();
+            
+            try {
+                let response = await fetch(URL_RECEPCIONISTA, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ email: email, deviceID: deviceID })
+                });
+
+                let data = await response.json();
+
+                if (data.status === "OK") {
+                    localStorage.setItem('diccionario_activado', 'true');
+                    entrarApp();
+                } else {
+                    msj.innerText = data.message || "Error de validación";
+                    msj.style.color = "red";
+                }
+            } catch (error) {
+                msj.innerText = "Error de conexión o validación.";
+                msj.style.color = "red";
+            }
+        }
+
+        function entrarApp() {
+            document.getElementById('pantalla-login').classList.remove('activa');
+            document.getElementById('pantalla-app').classList.add('activa');
+            iniciarApp();
+        }
+
+        window.onload = () => {
+            if (localStorage.getItem('diccionario_activado') === 'true') {
+                entrarApp();
+            }
+        };
+        // --- 2. LÓGICA MUSICAL Y CAGED EXPANDIDO ---
+        const NOTAS = ['C','C#','D','Eb','E','F','F#','G','G#','A','Bb','B'];
+        let notaActual = 'C';
+        let tipoActual = 'Mayor';
+        let variantesActuales = [];
+        let indiceVariante = 0;
+
+        const AFINACION = { 6: 'E', 5: 'A', 4: 'D', 3: 'G' }; 
+
+        // Diccionario expandido con formas C y G para tener 5 posiciones base
+        const DICCIONARIO = {
+            "Mayor": [
+                { rStr: 6, frets: [0, 2, 2, 1, 0, 0], fingers: [1, 3, 4, 2, 1, 1] }, // Forma E
+                { rStr: 5, frets: ['x', 0, 2, 2, 2, 0], fingers: ['x', 1, 2, 3, 4, 1] }, // Forma A
+                { rStr: 4, frets: ['x', 'x', 0, 2, 3, 2], fingers: ['x', 'x', 1, 2, 4, 3] }, // Forma D
+                { rStr: 5, frets: ['x', 3, 2, 0, 1, 0], fingers: ['x', 3, 2, 0, 1, 0], offset: -3 }, // Forma C (requiere offset lógico)
+                { rStr: 6, frets: [3, 2, 0, 0, 0, 3], fingers: [3, 2, 0, 0, 0, 4], offset: -3 }  // Forma G
+            ],
+            "m": [
+                { rStr: 6, frets: [0, 2, 2, 0, 0, 0], fingers: [1, 3, 4, 1, 1, 1] },
+                { rStr: 5, frets: ['x', 0, 2, 2, 1, 0], fingers: ['x', 1, 3, 4, 2, 1] },
+                { rStr: 4, frets: ['x', 'x', 0, 2, 3, 1], fingers: ['x', 'x', 1, 2, 4, 1] }
+            ],
+            "7": [
+                { rStr: 6, frets: [0, 2, 0, 1, 0, 0], fingers: [1, 3, 1, 2, 1, 1] },
+                { rStr: 5, frets: ['x', 0, 2, 0, 2, 0], fingers: ['x', 1, 3, 1, 4, 1] },
+                { rStr: 4, frets: ['x', 'x', 0, 2, 1, 2], fingers: ['x', 'x', 1, 3, 2, 4] },
+                { rStr: 5, frets: ['x', 3, 2, 3, 1, 0], fingers: ['x', 3, 2, 4, 1, 0], offset: -3 } // Forma C7
+            ],
+            "maj7": [
+                { rStr: 6, frets: [0, 'x', 1, 1, 0, 'x'], fingers: [1, 'x', 3, 4, 2, 'x'] },
+                { rStr: 5, frets: ['x', 0, 2, 1, 2, 0], fingers: ['x', 1, 3, 2, 4, 1] },
+                { rStr: 4, frets: ['x', 'x', 0, 2, 2, 2], fingers: ['x', 'x', 1, 2, 3, 4] },
+                { rStr: 5, frets: ['x', 3, 2, 0, 0, 0], fingers: ['x', 3, 2, 0, 0, 0], offset: -3 } // Forma Cmaj7
+            ],
+            "m7": [
+                { rStr: 6, frets: [0, 2, 0, 0, 0, 0], fingers: [1, 3, 1, 1, 1, 1] },
+                { rStr: 5, frets: ['x', 0, 2, 0, 1, 0], fingers: ['x', 1, 3, 1, 2, 1] },
+                { rStr: 4, frets: ['x', 'x', 0, 2, 1, 1], fingers: ['x', 'x', 1, 3, 2, 2] }
+            ],
+            // El resto de los acordes de tensión mantienen las 2-3 posiciones más tocables
+            "aug": [
+                { rStr: 6, frets: [0, 'x', 2, 1, 1, 'x'], fingers: [1, 'x', 4, 2, 3, 'x'] },
+                { rStr: 5, frets: ['x', 0, 3, 2, 2, 'x'], fingers: ['x', 1, 4, 2, 3, 'x'] }
+            ],
+            "dim": [
+                { rStr: 6, frets: [0, 'x', -1, 0, -1, 'x'], fingers: [2, 'x', 1, 3, 1, 'x'] },
+                { rStr: 5, frets: ['x', 0, 1, -1, 'x', 'x'], fingers: ['x', 2, 3, 1, 'x', 'x'] },
+                { rStr: 4, frets: ['x', 'x', 0, 1, 3, 1], fingers: ['x', 'x', 1, 2, 4, 1] }
+            ],
+            "sus4": [
+                { rStr: 6, frets: [0, 2, 2, 2, 0, 0], fingers: [1, 3, 4, 4, 1, 1] },
+                { rStr: 5, frets: ['x', 0, 2, 2, 3, 0], fingers: ['x', 1, 2, 3, 4, 1] },
+                { rStr: 4, frets: ['x', 'x', 0, 2, 3, 3], fingers: ['x', 'x', 1, 2, 3, 4] }
+            ],
+            "sus2": [
+                { rStr: 6, frets: [0, 2, 4, 2, 0, 0], fingers: [1, 2, 4, 3, 1, 1] },
+                { rStr: 5, frets: ['x', 0, 2, 2, 0, 0], fingers: ['x', 1, 3, 4, 1, 1] },
+                { rStr: 4, frets: ['x', 'x', 0, 2, 3, 0], fingers: ['x', 'x', 1, 2, 3, 1] }
+            ],
+            "5": [
+                { rStr: 6, frets: [0, 2, 2, 'x', 'x', 'x'], fingers: [1, 3, 4, 'x', 'x', 'x'] },
+                { rStr: 5, frets: ['x', 0, 2, 2, 'x', 'x'], fingers: ['x', 1, 3, 4, 'x', 'x'] },
+                { rStr: 4, frets: ['x', 'x', 0, 2, 3, 'x'], fingers: ['x', 'x', 1, 3, 4, 'x'] }
+            ],
+            "mMaj7": [
+                { rStr: 6, frets: [0, 'x', 1, 0, 0, 'x'], fingers: [1, 'x', 3, 1, 2, 'x'] },
+                { rStr: 5, frets: ['x', 0, 1, 1, 1, 0], fingers: ['x', 1, 2, 3, 4, 1] }
+            ],
+            "m7b5": [
+                { rStr: 6, frets: [0, 'x', 0, 0, -1, 'x'], fingers: [2, 'x', 3, 4, 1, 'x'] },
+                { rStr: 5, frets: ['x', 0, 1, 0, 1, 'x'], fingers: ['x', 1, 3, 2, 4, 'x'] }
+            ],
+            "dim7": [
+                { rStr: 6, frets: [0, 'x', -1, 0, -1, 'x'], fingers: [2, 'x', 1, 4, 1, 'x'] },
+                { rStr: 5, frets: ['x', 0, 1, -1, 1, 'x'], fingers: ['x', 2, 3, 1, 4, 'x'] },
+                { rStr: 4, frets: ['x', 'x', 0, 1, 2, 1], fingers: ['x', 'x', 1, 2, 3, 1] }
+            ],
+            "aug7": [
+                { rStr: 6, frets: [0, 'x', 0, 1, 1, 'x'], fingers: [1, 'x', 1, 2, 3, 'x'] },
+                { rStr: 5, frets: ['x', 0, 2, 1, 3, 'x'], fingers: ['x', 1, 3, 2, 4, 'x'] }
+            ],
+            "6": [
+                { rStr: 6, frets: [0, 'x', -1, 0, 0, 'x'], fingers: [2, 'x', 1, 3, 4, 'x'] },
+                { rStr: 5, frets: ['x', 0, 2, -1, 2, 'x'], fingers: ['x', 2, 4, 1, 4, 'x'] }
+            ],
+            "m6": [
+                { rStr: 6, frets: [0, 'x', -1, 0, 0, 'x'], fingers: [2, 'x', 1, 3, 4, 'x'] }, 
+                { rStr: 5, frets: ['x', 0, -2, -1, -2, 'x'], fingers: ['x', 3, 1, 2, 1, 'x'] }
+            ],
+            "add9": [
+                { rStr: 6, frets: [0, 2, 4, 1, 0, 0], fingers: [1, 2, 4, 1, 1, 1] },
+                { rStr: 5, frets: ['x', 0, 2, 4, 2, 0], fingers: ['x', 1, 2, 4, 3, 1] }
+            ],
+            "6/9": [
+                { rStr: 6, frets: [0, 'x', -1, 0, 0, 0], fingers: [2, 'x', 1, 3, 3, 3] },
+                { rStr: 5, frets: ['x', 0, -1, 0, 0, 'x'], fingers: ['x', 2, 1, 3, 4, 'x'] }
+            ],
+            "9": [
+                { rStr: 6, frets: [0, 'x', 0, 1, 0, 0], fingers: [2, 'x', 1, 3, 3, 3] },
+                { rStr: 5, frets: ['x', 0, -1, 0, 0, 0], fingers: ['x', 2, 1, 3, 3, 3] }
+            ],
+            "maj9": [
+                { rStr: 6, frets: [0, 'x', 1, 1, 0, 0], fingers: [1, 'x', 3, 4, 2, 2] },
+                { rStr: 5, frets: ['x', 0, -1, 1, 0, 'x'], fingers: ['x', 2, 1, 4, 3, 'x'] }
+            ],
+            "m9": [
+                { rStr: 6, frets: [0, 'x', -1, 0, 0, 0], fingers: [2, 'x', 1, 3, 3, 3] },
+                { rStr: 5, frets: ['x', 0, -1, 0, -1, 'x'], fingers: ['x', 3, 1, 4, 2, 'x'] }
+            ],
+            "11": [
+                { rStr: 5, frets: ['x', 0, -1, 0, -2, 'x'], fingers: ['x', 3, 2, 4, 1, 'x'] }
+            ],
+            "13": [
+                { rStr: 6, frets: [0, 'x', 0, 1, 0, 0], fingers: [1, 'x', 1, 3, 2, 4] },
+                { rStr: 5, frets: ['x', 0, -1, 0, 0, 2], fingers: ['x', 2, 1, 3, 4, 4] }
+            ],
+            "7b5": [
+                { rStr: 5, frets: ['x', 0, 2, 1, 1, 'x'], fingers: ['x', 1, 3, 2, 2, 'x'] }
+            ],
+            "7#5": [
+                { rStr: 5, frets: ['x', 0, 2, 1, 3, 'x'], fingers: ['x', 1, 3, 2, 4, 'x'] }
+            ],
+            "7b9": [
+                { rStr: 6, frets: [0, 'x', 0, 1, -1, 'x'], fingers: [2, 'x', 2, 3, 1, 'x'] },
+                { rStr: 5, frets: ['x', 0, -1, -1, -1, 'x'], fingers: ['x', 3, 1, 1, 1, 'x'] }
+            ],
+            "7#9": [
+                { rStr: 6, frets: [0, 'x', 0, 1, 1, 'x'], fingers: [2, 'x', 1, 3, 4, 'x'] },
+                { rStr: 5, frets: ['x', 0, -1, 0, 1, 'x'], fingers: ['x', 2, 1, 3, 4, 'x'] }
+            ]
+        };
+
+        function calcularTrasteRaiz(notaBuscada, cuerdaRaiz) {
+            let notaCuerda = AFINACION[cuerdaRaiz];
+            let iBase = NOTAS.indexOf(notaCuerda);
+            let iBuscada = NOTAS.indexOf(notaBuscada);
+            return (iBuscada - iBase + 12) % 12;
+        }
+
+        function iniciarApp() {
+            let grid = document.getElementById('grid-notas');
+            NOTAS.forEach(n => {
+                let div = document.createElement('div');
+                div.className = 'nota';
+                if(n === 'C') div.classList.add('seleccionada');
+                div.innerText = n;
+                div.onclick = () => {
+                    document.querySelectorAll('.nota').forEach(el => el.classList.remove('seleccionada'));
+                    div.classList.add('seleccionada');
+                    notaActual = n;
+                    actualizarAcorde();
+                };
+                grid.appendChild(div);
+            });
+            actualizarAcorde();
+        }
+
+        function actualizarAcorde() {
+            tipoActual = document.getElementById('select-tipo').value;
+            let tipoVisual = tipoActual === 'Mayor' ? '' : tipoActual;
+            document.getElementById('titulo-visor').innerText = notaActual + " " + tipoVisual;
+            
+            variantesActuales = [];
+            let formulas = DICCIONARIO[tipoActual] || DICCIONARIO["Mayor"];
+            
+            formulas.forEach(forma => {
+                let trasteBase = calcularTrasteRaiz(notaActual, forma.rStr);
+                
+                // Si la forma tiene un offset (ej. forma de C que arranca 3 trastes antes de su raíz)
+                if (forma.offset) trasteBase += forma.offset;
+                
+                if (trasteBase < 0) trasteBase += 12; // Evitar trastes negativos
+
+                // Excepciones para acordes al aire
+                if (trasteBase === 12) trasteBase = 0; 
+                if (forma.offset === undefined && notaActual === AFINACION[forma.rStr]) trasteBase = 0;
+
+                let trastesCalculados = forma.frets.map((f, i) => {
+                    if (f === 'x') return 'x';
+                    // Si el dedo teórico es 0 (al aire en la forma base), y estamos tocando en otro traste, ese dedo pasa a formar parte de la cejilla
+                    let tFret = f + trasteBase;
+                    return tFret;
+                });
+                
+                // FILTRO: Si el cálculo da un traste negativo (pasa en formas raras en traste 0), lo ignoramos o subimos de octava.
+                let tieneNegativos = trastesCalculados.some(t => t !== 'x' && t < 0);
+                if (tieneNegativos) {
+                    trastesCalculados = trastesCalculados.map(t => t === 'x' ? 'x' : t + 12);
+                }
+
+                variantesActuales.push({
+                    trastes: trastesCalculados,
+                    fingers: forma.fingers,
+                    esAlAire: Math.min(...trastesCalculados.filter(t => t !== 'x')) === 0,
+                    fretOriginales: forma.frets
+                });
+            });
+
+            // --- SISTEMA DE ORDENAMIENTO INTELIGENTE (De más fácil a más difícil) ---
+            variantesActuales.sort((a, b) => {
+                let minA = Math.min(...a.trastes.filter(t => t !== 'x' && t > 0));
+                let minB = Math.min(...b.trastes.filter(t => t !== 'x' && t > 0));
+                if (minA === Infinity) minA = 0;
+                if (minB === Infinity) minB = 0;
+                
+                // Prioridad a acordes al aire
+                if (a.esAlAire && !b.esAlAire) return -1;
+                if (!a.esAlAire && b.esAlAire) return 1;
+
+                return minA - minB;
+            });
+
+            // Borrar duplicados si hay (por cruce matemático de CAGED)
+            variantesActuales = variantesActuales.filter((v, i, a) => 
+                a.findIndex(t => JSON.stringify(t.trastes) === JSON.stringify(v.trastes)) === i
+            );
+
+            indiceVariante = 0;
+            dibujarMastil();
+        }
+
+        function cambiarVariante(dir) {
+            indiceVariante += dir;
+            if(indiceVariante < 0) indiceVariante = variantesActuales.length - 1;
+            if(indiceVariante >= variantesActuales.length) indiceVariante = 0;
+            dibujarMastil();
+        }
+
+        function dibujarMastil() {
+            let svg = document.getElementById('svg-mastil');
+            svg.innerHTML = ''; 
+            
+            document.getElementById('texto-posicion').innerText = `POSICIÓN ${indiceVariante + 1} / ${variantesActuales.length}`;
+
+            let data = variantesActuales[indiceVariante];
+            let trastes = data.trastes;
+            
+            let numeros = trastes.filter(t => t !== 'x');
+            let minFret = Math.min(...numeros.filter(t => t > 0)); 
+            if (minFret === Infinity) minFret = 1;
+            let maxFret = Math.max(...numeros);
+            if (maxFret === 0) maxFret = 3; 
+
+            let startFret = minFret > 1 ? minFret - 1 : 1;
+            let fretSpan = maxFret - startFret + 1;
+            let totalFretsToShow = Math.max(5, fretSpan); 
+
+            const width = 240; 
+            const fretHeight = 55; 
+            const stringSpacing = width / 5;
+            
+            let svgHeight = (totalFretsToShow * fretHeight) + 40;
+            svg.setAttribute("viewBox", `-30 -30 300 ${svgHeight}`);
+
+            for(let i=0; i<6; i++) {
+                let x = i * stringSpacing;
+                let linea = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                linea.setAttribute("x1", x); linea.setAttribute("y1", 0);
+                linea.setAttribute("x2", x); linea.setAttribute("y2", totalFretsToShow * fretHeight);
+                linea.setAttribute("stroke", "#555");
+                linea.setAttribute("stroke-width", i < 3 ? 3 : 1.5);
+                svg.appendChild(linea);
+            }
+
+            for(let i=0; i<=totalFretsToShow; i++) {
+                let y = i * fretHeight;
+                let linea = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                linea.setAttribute("x1", 0); linea.setAttribute("y1", y);
+                linea.setAttribute("x2", width); linea.setAttribute("y2", y);
+                linea.setAttribute("stroke", "#888");
+                
+                if(startFret === 1 && i === 0) {
+                    linea.setAttribute("stroke", "#00f3ff");
+                    linea.setAttribute("stroke-width", 6);
+                    linea.style.filter = "drop-shadow(0 0 5px #00f3ff)";
+                } else {
+                    linea.setAttribute("stroke-width", 2);
+                }
+                svg.appendChild(linea);
+            }
+
+            if (startFret > 1) {
+                let textoFret = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                textoFret.setAttribute("x", -25);
+                textoFret.setAttribute("y", fretHeight / 2 + 5);
+                textoFret.setAttribute("fill", "#00f3ff");
+                textoFret.setAttribute("font-size", "14px");
+                textoFret.setAttribute("font-weight", "bold");
+                textoFret.textContent = startFret + "fr";
+                svg.appendChild(textoFret);
+            }
+
+            // CEJILLAS BARRADAS
+            let barres = {};
+            trastes.forEach((trasteVal, strIdx) => {
+                if(trasteVal !== 'x' && trasteVal > 0) {
+                    let relativeFret = trasteVal - startFret;
+                    // Lógica para saber si esta cuerda forma parte de la cejilla base
+                    let dedoTeorico = data.fingers[strIdx];
+                    let trasteTeorico = data.fretOriginales[strIdx];
+                    
+                    // Si el acorde se movió de traste y la cuerda original era 0, ahora la pisa el dedo 1
+                    let dedoReal = dedoTeorico;
+                    if (!data.esAlAire && trasteTeorico === 0) dedoReal = 1;
+
+                    if(dedoReal !== 'x') {
+                        let key = relativeFret + "_" + dedoReal;
+                        if(!barres[key]) barres[key] = [];
+                        barres[key].push(strIdx);
+                    }
+                }
+            });
+
+            for (let key in barres) {
+                if (barres[key].length > 1) { 
+                    let relFret = parseInt(key.split("_")[0]);
+                    let strings = barres[key];
+                    let minStr = Math.min(...strings);
+                    let maxStr = Math.max(...strings);
+                    let x1 = minStr * stringSpacing;
+                    let x2 = maxStr * stringSpacing;
+                    let y = (relFret * fretHeight) + (fretHeight / 2);
+
+                    let barreRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                    barreRect.setAttribute("x", x1 - 15);
+                    barreRect.setAttribute("y", y - 15);
+                    barreRect.setAttribute("width", (x2 - x1) + 30);
+                    barreRect.setAttribute("height", 30);
+                    barreRect.setAttribute("rx", 15); 
+                    barreRect.setAttribute("fill", "#00f3ff");
+                    barreRect.style.filter = "drop-shadow(0 0 10px #00f3ff)";
+                    svg.appendChild(barreRect);
+                }
+            }
+
+            // PUNTOS Y DEDOS
+            trastes.forEach((trasteVal, index) => {
+                let x = index * stringSpacing;
+                
+                if (trasteVal === 'x') {
+                    let txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    txt.setAttribute("x", x); txt.setAttribute("y", -10);
+                    txt.setAttribute("fill", "#ff0033"); txt.setAttribute("font-size", "16px");
+                    txt.setAttribute("font-weight", "bold"); txt.setAttribute("text-anchor", "middle");
+                    txt.textContent = "X";
+                    svg.appendChild(txt);
+                } else if (data.esAlAire && data.fretOriginales[index] === 0) {
+                    let txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    txt.setAttribute("x", x); txt.setAttribute("y", -10);
+                    txt.setAttribute("fill", "#00f3ff"); txt.setAttribute("font-size", "16px");
+                    txt.setAttribute("font-weight", "bold"); txt.setAttribute("text-anchor", "middle");
+                    txt.textContent = "O";
+                    svg.appendChild(txt);
+                } else {
+                    let relativeFret = trasteVal - startFret;
+                    let y = (relativeFret * fretHeight) + (fretHeight / 2);
+                    
+                    let dedoTeorico = data.fingers[index];
+                    let dedoReal = dedoTeorico;
+                    if (!data.esAlAire && data.fretOriginales[index] === 0) dedoReal = 1;
+
+                    let strIsInBarre = false;
+                    for (let key in barres) {
+                        if (barres[key].length > 1 && parseInt(key.split("_")[0]) === relativeFret && barres[key].includes(index)) {
+                            strIsInBarre = true;
+                        }
+                    }
+
+                    if (!strIsInBarre) {
+                        let circulo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                        circulo.setAttribute("cx", x);
+                        circulo.setAttribute("cy", y);
+                        circulo.setAttribute("r", 15);
+                        circulo.setAttribute("fill", "#ff00ff");
+                        circulo.style.filter = "drop-shadow(0 0 8px #ff00ff)";
+                        svg.appendChild(circulo);
+                    }
+
+                    if (dedoReal !== 'x' && dedoReal !== undefined) {
+                        let txtDedo = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        txtDedo.setAttribute("x", x);
+                        txtDedo.setAttribute("y", y + 5); 
+                        txtDedo.setAttribute("fill", "#000000"); 
+                        txtDedo.setAttribute("font-size", "14px");
+                        txtDedo.setAttribute("font-weight", "bold");
+                        txtDedo.setAttribute("text-anchor", "middle");
+                        txtDedo.textContent = dedoReal;
+                        svg.appendChild(txtDedo);
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
