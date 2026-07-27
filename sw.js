@@ -1,7 +1,25 @@
-self.addEventListener('install', (e) => {
-  console.log('Service Worker: Instalado');
+const CACHE_NAME = 'diccionario-v1';
+const urlsToCache = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icono.png'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
+  );
 });
 
-self.addEventListener('fetch', (e) => {
-  // Este evento vacío es el truco para que Chrome reconozca la PWA
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        return response || fetch(event.request);
+      })
+  );
 });
