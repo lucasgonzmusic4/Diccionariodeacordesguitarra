@@ -529,12 +529,16 @@
                 svg.appendChild(textoFret);
             }
 
-            // CORRECCIÓN: Armar las cejillas usando pura y exclusivamente el dedo asignado, sin forzar "1"
             let barres = {};
             trastes.forEach((trasteVal, strIdx) => {
                 if(trasteVal !== 'x' && trasteVal > 0) {
                     let relativeFret = trasteVal - startFret;
-                    let dedoReal = data.fingers[strIdx];
+                    let trasteTeorico = data.fretOriginales[strIdx];
+                    let dedoTeorico = data.fingers[strIdx];
+                    
+                    let dedoReal = dedoTeorico;
+                    // REGLA RECUPERADA: Si la nota antes era al aire y ahora no lo es, se pisa obligatoriamente con el dedo 1
+                    if (!data.esAlAire && trasteTeorico === 0) dedoReal = 1;
 
                     if(dedoReal !== 'x' && dedoReal !== undefined) {
                         let key = relativeFret + "_" + dedoReal;
@@ -587,10 +591,13 @@
                     let relativeFret = trasteVal - startFret;
                     let y = (relativeFret * fretHeight) + (fretHeight / 2);
                     
-                    // CORRECCIÓN: Respetamos el dedo que marca el diccionario sin excepciones
-                    let dedoReal = data.fingers[index];
+                    let trasteTeorico = data.fretOriginales[index];
+                    let dedoTeorico = data.fingers[index];
+                    
+                    let dedoReal = dedoTeorico;
+                    // REGLA RECUPERADA: Repetimos acá para que imprima correctamente el número
+                    if (!data.esAlAire && trasteTeorico === 0) dedoReal = 1;
 
-                    // CORRECCIÓN VISUAL: Detectar si esta cuerda es la "primera" (más grave) de su cejilla
                     let strIsInBarre = false;
                     let isFirstInBarre = false;
                     
@@ -614,7 +621,6 @@
                     }
 
                     if (dedoReal !== 'x' && dedoReal !== undefined) {
-                        // CORRECCIÓN VISUAL: Solo dibuja el número si NO es cejilla, O si es el borde izquierdo de la cejilla
                         if (!strIsInBarre || isFirstInBarre) {
                             let txtDedo = document.createElementNS("http://www.w3.org/2000/svg", "text");
                             txtDedo.setAttribute("x", x);
