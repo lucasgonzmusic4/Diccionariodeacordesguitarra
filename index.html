@@ -44,6 +44,9 @@
         .btn-fucsia { color: #ff00ff; border-color: rgba(255, 0, 255, 0.5); box-shadow: 0 4px 15px rgba(255, 0, 255, 0.1); }
         .btn-fucsia:active { background-color: #ff00ff; color: #000; box-shadow: 0 0 25px rgba(255, 0, 255, 0.6); }
 
+        .btn-instalar { background-color: #00f3ff; color: #000; border: none; box-shadow: 0 0 20px rgba(0, 243, 255, 0.5); display: none; }
+        .btn-instalar:active { background-color: #ffffff; }
+
         .input-cyber {
             width: 90%; max-width: 420px; padding: 15px;
             background-color: #0d0d0d; color: #fff; border: 1px solid #333;
@@ -57,51 +60,27 @@
         }
         .input-cyber:focus { border-color: #ff00ff; box-shadow: 0 0 10px rgba(255,0,255,0.2); }
 
-        .grid-notas {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
-            width: 90%; max-width: 420px; margin-bottom: 25px;
-        }
-        .nota {
-            background: #111; border: 1px solid #222; color: #888;
-            padding: 15px 0; text-align: center; font-size: 1.2em; font-weight: bold;
-            border-radius: 8px; cursor: pointer; transition: 0.2s;
-        }
-        .nota.seleccionada {
-            background: #2a002a; color: #ff00ff; border-color: #ff00ff;
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3); text-shadow: 0 0 8px #ff00ff;
-        }
-
-        .visor-acorde {
-            width: 100%; max-width: 400px;
-            background: #0a0a0a; border: 1px solid #222; border-radius: 15px;
-            padding: 20px; box-sizing: border-box;
-            display: flex; flex-direction: column; align-items: center; margin-top: 10px;
-        }
-        .titulo-acorde {
-            font-size: 2.2em; font-weight: 900; color: #00f3ff;
-            text-shadow: 0 0 15px rgba(0, 243, 255, 0.5); margin-bottom: 20px; letter-spacing: 2px;
-        }
-        
-        .controles-variantes {
-            display: flex; justify-content: space-between; align-items: center;
-            width: 100%; margin-bottom: 20px;
-        }
-        .btn-flecha {
-            background: none; border: 1px solid #444; color: #fff; font-size: 1.5em;
-            width: 45px; height: 45px; border-radius: 50%; cursor: pointer;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .btn-flecha:active { background: #333; }
+        .grid-notas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 90%; max-width: 420px; margin-bottom: 25px; }
+        .nota { background: #111; border: 1px solid #222; color: #888; padding: 15px 0; text-align: center; font-size: 1.2em; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .nota.seleccionada { background: #2a002a; color: #ff00ff; border-color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.3); text-shadow: 0 0 8px #ff00ff; }
+        .visor-acorde { width: 100%; max-width: 400px; background: #0a0a0a; border: 1px solid #222; border-radius: 15px; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
+        .titulo-acorde { font-size: 2.2em; font-weight: 900; color: #00f3ff; text-shadow: 0 0 15px rgba(0, 243, 255, 0.5); margin-bottom: 20px; letter-spacing: 2px; }
+        .controles-variantes { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px; }
+        .btn-flecha { background: none; border: 1px solid #444; color: #fff; font-size: 1.5em; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; }
         .texto-variante { color: #aaa; font-weight: bold; letter-spacing: 1px; font-size: 0.9em; }
-
         #svg-mastil { width: 100%; max-width: 280px; height: auto; overflow: visible; }
     </style>
 </head>
 <body>
 
+    <!-- ================= LOGIN ================= -->
     <div id="pantalla-login" class="pantalla activa">
         <h1>DICCIONARIO<span>DE ACORDES</span></h1>
-        <div style="margin-top: 40px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+        
+        <!-- BOTÓN MÁGICO DE INSTALACIÓN (Se muestra solo si Android lo aprueba) -->
+        <button id="btn-instalar-app" class="btn-principal btn-instalar" onclick="forzarInstalacion()">📲 INSTALAR APP</button>
+
+        <div style="margin-top: 20px; width: 100%; display: flex; flex-direction: column; align-items: center;">
             <p style="color: #777; width: 90%; max-width: 420px; text-align: center; margin-bottom: 20px;">
                 Ingresá tu correo para validar tu licencia vitalicia.
             </p>
@@ -111,6 +90,7 @@
         </div>
     </div>
 
+    <!-- ================= APP PRINCIPAL ================= -->
     <div id="pantalla-app" class="pantalla" style="padding-top: 30px;">
         <h2 style="color: #fff; font-weight: 300; letter-spacing: 2px; font-size: 1.2em; margin-bottom: 10px;">1. TONALIDAD</h2>
         <div class="grid-notas" id="grid-notas"></div>
@@ -171,6 +151,45 @@
         </div>
     </div>
 
+    <!-- SCRIPT DE INSTALACIÓN PWA -->
+    <script>
+        let disparadorInstalacion;
+        const btnInstalar = document.getElementById('btn-instalar-app');
+
+        // Escucha si Chrome da permiso para instalar la app
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Previene que Chrome muestre el mini-cartel genérico abajo
+            e.preventDefault();
+            // Guarda el evento para usarlo cuando el usuario toque nuestro botón
+            disparadorInstalacion = e;
+            // Muestra nuestro botón gigante de instalación
+            btnInstalar.style.display = 'block';
+        });
+
+        // Función atada al botón
+        async function forzarInstalacion() {
+            if (!disparadorInstalacion) return;
+            // Dispara el cartel nativo de Android
+            disparadorInstalacion.prompt();
+            // Espera a ver si el usuario acepta
+            const { outcome } = await disparadorInstalacion.userChoice;
+            if (outcome === 'accepted') {
+                btnInstalar.style.display = 'none'; // Esconde el botón si se instaló
+            }
+            disparadorInstalacion = null;
+        }
+
+        // Registro del Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW listo', reg))
+                    .catch(err => console.error('Error SW', err));
+            });
+        }
+    </script>
+
+    <!-- LOGICA MUSICAL Y LOGIN -->
     <script>
         const URL_RECEPCIONISTA = "https://script.google.com/macros/s/AKfycbx6-2gfl9UGXOi5CQDaEC55_89hsRflJGF8DyiC9jz4hw82mhMaEmeK99Y4VxOKoVW6/exec";
 
@@ -607,16 +626,6 @@
                         svg.appendChild(txtDedo);
                     }
                 }
-            });
-        }
-    </script>
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW registrado', reg))
-                    .catch(err => console.error('Error SW', err));
             });
         }
     </script>
