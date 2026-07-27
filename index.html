@@ -73,11 +73,9 @@
 </head>
 <body>
 
-    <!-- ================= LOGIN ================= -->
     <div id="pantalla-login" class="pantalla activa">
         <h1>DICCIONARIO<span>DE ACORDES</span></h1>
         
-        <!-- BOTÓN DE DIAGNÓSTICO E INSTALACIÓN -->
         <button id="btn-instalar-app" class="btn-principal btn-instalar" onclick="forzarInstalacion()">📲 PROBAR INSTALACIÓN</button>
 
         <div style="margin-top: 20px; width: 100%; display: flex; flex-direction: column; align-items: center;">
@@ -90,7 +88,6 @@
         </div>
     </div>
 
-    <!-- ================= APP PRINCIPAL ================= -->
     <div id="pantalla-app" class="pantalla" style="padding-top: 30px;">
         <h2 style="color: #fff; font-weight: 300; letter-spacing: 2px; font-size: 1.2em; margin-bottom: 10px;">1. TONALIDAD</h2>
         <div class="grid-notas" id="grid-notas"></div>
@@ -256,13 +253,14 @@
 
         const AFINACION = { 6: 'E', 5: 'A', 4: 'D', 3: 'G' }; 
 
+        // DICCIONARIO CORREGIDO: Las versiones movibles ahora usan dedos de cejilla por defecto (4, 3, 2, etc.)
         const DICCIONARIO = {
             "Mayor": [
                 { rStr: 6, frets: [0, 2, 2, 1, 0, 0], fingers: [1, 3, 4, 2, 1, 1] },
                 { rStr: 5, frets: ['x', 0, 2, 2, 2, 0], fingers: ['x', 1, 2, 3, 4, 1] },
                 { rStr: 4, frets: ['x', 'x', 0, 2, 3, 2], fingers: ['x', 'x', 1, 2, 4, 3] },
-                { rStr: 5, frets: ['x', 3, 2, 0, 1, 0], fingers: ['x', 3, 2, 0, 1, 0], offset: -3 },
-                { rStr: 6, frets: [3, 2, 0, 0, 0, 3], fingers: [3, 2, 0, 0, 0, 4], offset: -3 }
+                { rStr: 5, frets: ['x', 3, 2, 0, 1, 0], fingers: ['x', 4, 3, 1, 2, 1], offset: -3 }, // Molde Do movible
+                { rStr: 6, frets: [3, 2, 0, 0, 0, 3], fingers: [3, 2, 1, 1, 1, 4], offset: -3 } // Molde Sol movible
             ],
             "m": [
                 { rStr: 6, frets: [0, 2, 2, 0, 0, 0], fingers: [1, 3, 4, 1, 1, 1] },
@@ -273,13 +271,13 @@
                 { rStr: 6, frets: [0, 2, 0, 1, 0, 0], fingers: [1, 3, 1, 2, 1, 1] },
                 { rStr: 5, frets: ['x', 0, 2, 0, 2, 0], fingers: ['x', 1, 3, 1, 4, 1] },
                 { rStr: 4, frets: ['x', 'x', 0, 2, 1, 2], fingers: ['x', 'x', 1, 3, 2, 4] },
-                { rStr: 5, frets: ['x', 3, 2, 3, 1, 0], fingers: ['x', 3, 2, 4, 1, 0], offset: -3 }
+                { rStr: 5, frets: ['x', 3, 2, 3, 1, 0], fingers: ['x', 3, 2, 4, 1, 1], offset: -3 } // Molde C7 movible
             ],
             "maj7": [
                 { rStr: 6, frets: [0, 'x', 1, 1, 0, 'x'], fingers: [1, 'x', 3, 4, 2, 'x'] },
                 { rStr: 5, frets: ['x', 0, 2, 1, 2, 0], fingers: ['x', 1, 3, 2, 4, 1] },
                 { rStr: 4, frets: ['x', 'x', 0, 2, 2, 2], fingers: ['x', 'x', 1, 2, 3, 4] },
-                { rStr: 5, frets: ['x', 3, 2, 0, 0, 0], fingers: ['x', 3, 2, 0, 0, 0], offset: -3 }
+                { rStr: 5, frets: ['x', 3, 2, 0, 0, 0], fingers: ['x', 4, 3, 1, 1, 1], offset: -3 } // Molde Cmaj7 movible
             ],
             "m7": [
                 { rStr: 6, frets: [0, 2, 0, 0, 0, 0], fingers: [1, 3, 1, 1, 1, 1] },
@@ -529,16 +527,37 @@
                 svg.appendChild(textoFret);
             }
 
+            // FUNCIÓN SEPARADORA: Define cómo se ven los dedos según si es un acorde abierto o movible
+            function obtenerDedo(strIdx, dataObj) {
+                let trasteTeo = dataObj.fretOriginales[strIdx];
+                let dedoReal = dataObj.fingers[strIdx];
+                
+                if (dataObj.esAlAire) {
+                    // Si el acorde es abierto, forzamos a que muestre la digitación tradicional clásica
+                    let openMap = {
+                        "['x',3,2,0,1,0]": ['x',3,2,'x',1,'x'], // C Mayor Abierto
+                        "[3,2,0,0,0,3]": [3,2,'x','x','x',4],   // G Mayor Abierto
+                        "['x',3,2,3,1,0]": ['x',3,2,4,1,'x'],   // C7 Abierto
+                        "['x',3,2,0,0,0]": ['x',3,2,'x','x','x'] // Cmaj7 Abierto
+                    };
+                    let key = JSON.stringify(dataObj.fretOriginales).replace(/\s/g, '');
+                    if (openMap[key]) {
+                        dedoReal = openMap[key][strIdx];
+                    } else if (trasteTeo === 0) {
+                        dedoReal = 'x'; // No imprimimos número si la nota está al aire
+                    }
+                } else {
+                    // Si el acorde está movido, la nota teórica "0" ahora es siempre la cejilla (dedo 1)
+                    if (trasteTeo === 0) dedoReal = 1;
+                }
+                return dedoReal;
+            }
+
             let barres = {};
             trastes.forEach((trasteVal, strIdx) => {
                 if(trasteVal !== 'x' && trasteVal > 0) {
                     let relativeFret = trasteVal - startFret;
-                    let trasteTeorico = data.fretOriginales[strIdx];
-                    let dedoTeorico = data.fingers[strIdx];
-                    
-                    let dedoReal = dedoTeorico;
-                    // REGLA RECUPERADA: Si la nota antes era al aire y ahora no lo es, se pisa obligatoriamente con el dedo 1
-                    if (!data.esAlAire && trasteTeorico === 0) dedoReal = 1;
+                    let dedoReal = obtenerDedo(strIdx, data);
 
                     if(dedoReal !== 'x' && dedoReal !== undefined) {
                         let key = relativeFret + "_" + dedoReal;
@@ -591,12 +610,7 @@
                     let relativeFret = trasteVal - startFret;
                     let y = (relativeFret * fretHeight) + (fretHeight / 2);
                     
-                    let trasteTeorico = data.fretOriginales[index];
-                    let dedoTeorico = data.fingers[index];
-                    
-                    let dedoReal = dedoTeorico;
-                    // REGLA RECUPERADA: Repetimos acá para que imprima correctamente el número
-                    if (!data.esAlAire && trasteTeorico === 0) dedoReal = 1;
+                    let dedoReal = obtenerDedo(index, data);
 
                     let strIsInBarre = false;
                     let isFirstInBarre = false;
