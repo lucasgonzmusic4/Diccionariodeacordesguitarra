@@ -44,7 +44,6 @@
         .btn-fucsia { color: #ff00ff; border-color: rgba(255, 0, 255, 0.5); box-shadow: 0 4px 15px rgba(255, 0, 255, 0.1); }
         .btn-fucsia:active { background-color: #ff00ff; color: #000; box-shadow: 0 0 25px rgba(255, 0, 255, 0.6); }
 
-        /* Botón de instalación ahora visible por defecto para forzar test */
         .btn-instalar { background-color: #00f3ff; color: #000; border: none; box-shadow: 0 0 20px rgba(0, 243, 255, 0.5); display: block; margin-top: 20px; transition: 0.5s;}
         .btn-instalar:active { background-color: #ffffff; }
 
@@ -157,28 +156,20 @@
         let disparadorInstalacion = null;
         const btnInstalar = document.getElementById('btn-instalar-app');
 
-        // Escucha si Chrome da permiso para instalar la app
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             disparadorInstalacion = e;
-            
-            // Si Chrome la aprueba, el botón se pone verde
             btnInstalar.innerText = "📲 INSTALAR APP AHORA";
             btnInstalar.style.backgroundColor = "#00ff73"; 
             btnInstalar.style.boxShadow = "0 0 20px rgba(0, 255, 115, 0.5)";
         });
 
-        // Función atada al botón
         async function forzarInstalacion() {
             if (!disparadorInstalacion) {
-                // Si el evento nunca llegó, tiramos la alerta para saber por qué falla
-                alert("Chrome está bloqueando la instalación.\n\nMotivos posibles:\n1. Estás viendo una versión vieja (usá pestaña de incógnito para probar).\n2. Tu archivo icono.png NO mide exactamente 512x512 píxeles o es un JPG con el nombre cambiado (ESTE ES EL ERROR MÁS COMÚN).\n3. Ya instalaste la app antes.");
+                alert("Chrome está bloqueando la instalación.\n\nMotivos posibles:\n1. Estás viendo una versión vieja (borrá caché de la página).\n2. Tu archivo icono.png no mide exactamente 512x512 píxeles.\n3. Ya instalaste la app antes.");
                 return;
             }
-            
-            // Dispara el cartel nativo de Android
             disparadorInstalacion.prompt();
-            
             const { outcome } = await disparadorInstalacion.userChoice;
             if (outcome === 'accepted') {
                 btnInstalar.style.display = 'none'; 
@@ -186,7 +177,6 @@
             disparadorInstalacion = null;
         }
 
-        // Registro del Service Worker (con un parámetro extra para evitar el caché)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime())
@@ -539,17 +529,14 @@
                 svg.appendChild(textoFret);
             }
 
+            // CORRECCIÓN: Armar las cejillas usando pura y exclusivamente el dedo asignado, sin forzar "1"
             let barres = {};
             trastes.forEach((trasteVal, strIdx) => {
                 if(trasteVal !== 'x' && trasteVal > 0) {
                     let relativeFret = trasteVal - startFret;
-                    let dedoTeorico = data.fingers[strIdx];
-                    let trasteTeorico = data.fretOriginales[strIdx];
-                    
-                    let dedoReal = dedoTeorico;
-                    if (!data.esAlAire && trasteTeorico === 0) dedoReal = 1;
+                    let dedoReal = data.fingers[strIdx];
 
-                    if(dedoReal !== 'x') {
+                    if(dedoReal !== 'x' && dedoReal !== undefined) {
                         let key = relativeFret + "_" + dedoReal;
                         if(!barres[key]) barres[key] = [];
                         barres[key].push(strIdx);
@@ -600,14 +587,19 @@
                     let relativeFret = trasteVal - startFret;
                     let y = (relativeFret * fretHeight) + (fretHeight / 2);
                     
-                    let dedoTeorico = data.fingers[index];
-                    let dedoReal = dedoTeorico;
-                    if (!data.esAlAire && data.fretOriginales[index] === 0) dedoReal = 1;
+                    // CORRECCIÓN: Respetamos el dedo que marca el diccionario sin excepciones
+                    let dedoReal = data.fingers[index];
 
+                    // CORRECCIÓN VISUAL: Detectar si esta cuerda es la "primera" (más grave) de su cejilla
                     let strIsInBarre = false;
+                    let isFirstInBarre = false;
+                    
                     for (let key in barres) {
                         if (barres[key].length > 1 && parseInt(key.split("_")[0]) === relativeFret && barres[key].includes(index)) {
                             strIsInBarre = true;
+                            if (Math.min(...barres[key]) === index) {
+                                isFirstInBarre = true;
+                            }
                         }
                     }
 
@@ -622,15 +614,18 @@
                     }
 
                     if (dedoReal !== 'x' && dedoReal !== undefined) {
-                        let txtDedo = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                        txtDedo.setAttribute("x", x);
-                        txtDedo.setAttribute("y", y + 5); 
-                        txtDedo.setAttribute("fill", "#000000"); 
-                        txtDedo.setAttribute("font-size", "14px");
-                        txtDedo.setAttribute("font-weight", "bold");
-                        txtDedo.setAttribute("text-anchor", "middle");
-                        txtDedo.textContent = dedoReal;
-                        svg.appendChild(txtDedo);
+                        // CORRECCIÓN VISUAL: Solo dibuja el número si NO es cejilla, O si es el borde izquierdo de la cejilla
+                        if (!strIsInBarre || isFirstInBarre) {
+                            let txtDedo = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                            txtDedo.setAttribute("x", x);
+                            txtDedo.setAttribute("y", y + 5); 
+                            txtDedo.setAttribute("fill", "#000000"); 
+                            txtDedo.setAttribute("font-size", "14px");
+                            txtDedo.setAttribute("font-weight", "bold");
+                            txtDedo.setAttribute("text-anchor", "middle");
+                            txtDedo.textContent = dedoReal;
+                            svg.appendChild(txtDedo);
+                        }
                     }
                 }
             });
