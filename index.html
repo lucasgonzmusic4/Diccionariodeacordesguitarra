@@ -255,27 +255,28 @@
 
         const AFINACION = { 6: 'E', 5: 'A', 4: 'D', 3: 'G' }; 
 
+        // DICCIONARIO PURGADO Y CORREGIDO DE ERRORES DE DEDOS 1 REPETIDOS
         const DICCIONARIO = {
             "Mayor": [
                 { rStr: 6, frets: [0, 2, 2, 1, 0, 0], fingers: [1, 3, 4, 2, 1, 1] },
                 { rStr: 5, frets: ['x', 0, 2, 2, 2, 0], fingers: ['x', 1, 2, 3, 4, 1] },
                 { rStr: 4, frets: ['x', 'x', 0, 2, 3, 2], fingers: ['x', 'x', 1, 2, 4, 3] },
-                { rStr: 5, frets: ['x', 3, 2, 0, 1, 0], fingers: ['x', 4, 3, 1, 2, 1], offset: -3 }, // Molde Do movible
-                { rStr: 6, frets: [3, 2, 0, 0, 0, 3], fingers: [3, 2, 1, 1, 1, 4], offset: -3 } // Molde Sol movible
+                { rStr: 5, frets: ['x', 3, 2, 0, 1, 0], fingers: ['x', 4, 3, 1, 2, 1], offset: -3 },
+                { rStr: 6, frets: [3, 2, 0, 0, 0, 3], fingers: [3, 2, 1, 1, 1, 4], offset: -3 }
             ],
             "m": [
                 { rStr: 6, frets: [0, 2, 2, 0, 0, 0], fingers: [1, 3, 4, 1, 1, 1] },
                 { rStr: 5, frets: ['x', 0, 2, 2, 1, 0], fingers: ['x', 1, 3, 4, 2, 1] },
-                { rStr: 4, frets: ['x', 'x', 0, 2, 3, 1], fingers: ['x', 'x', 1, 2, 4, 1] }
+                { rStr: 4, frets: ['x', 'x', 0, 2, 3, 1], fingers: ['x', 'x', 1, 3, 4, 2] }
             ],
             "7": [
                 { rStr: 6, frets: [0, 2, 0, 1, 0, 0], fingers: [1, 3, 1, 2, 1, 1] },
                 { rStr: 5, frets: ['x', 0, 2, 0, 2, 0], fingers: ['x', 1, 3, 1, 4, 1] },
                 { rStr: 4, frets: ['x', 'x', 0, 2, 1, 2], fingers: ['x', 'x', 1, 3, 2, 4] },
-                { rStr: 5, frets: ['x', 3, 2, 3, 1, 0], fingers: ['x', 3, 2, 4, 1, 1], offset: -3 } 
+                { rStr: 5, frets: ['x', 3, 2, 3, 1, 'x'], fingers: ['x', 3, 2, 4, 1, 'x'], offset: -3 } 
             ],
             "maj7": [
-                { rStr: 6, frets: [0, 'x', 1, 1, 0, 'x'], fingers: [1, 'x', 3, 4, 2, 'x'] },
+                { rStr: 6, frets: [0, 'x', 1, 1, 0, 'x'], fingers: [1, 'x', 3, 4, 1, 'x'] },
                 { rStr: 5, frets: ['x', 0, 2, 1, 2, 0], fingers: ['x', 1, 3, 2, 4, 1] },
                 { rStr: 4, frets: ['x', 'x', 0, 2, 2, 2], fingers: ['x', 'x', 1, 2, 3, 4] },
                 { rStr: 5, frets: ['x', 3, 2, 0, 0, 0], fingers: ['x', 4, 3, 1, 1, 1], offset: -3 } 
@@ -292,10 +293,10 @@
             "dim": [
                 { rStr: 6, frets: [0, 'x', -1, 0, -1, 'x'], fingers: [2, 'x', 1, 3, 1, 'x'] },
                 { rStr: 5, frets: ['x', 0, 1, -1, 'x', 'x'], fingers: ['x', 2, 3, 1, 'x', 'x'] },
-                { rStr: 4, frets: ['x', 'x', 0, 1, 3, 1], fingers: ['x', 'x', 1, 2, 4, 1] }
+                { rStr: 4, frets: ['x', 'x', 0, 1, 3, 1], fingers: ['x', 'x', 1, 2, 4, 3] }
             ],
             "sus4": [
-                { rStr: 6, frets: [0, 2, 2, 2, 0, 0], fingers: [1, 3, 4, 4, 1, 1] },
+                { rStr: 6, frets: [0, 2, 2, 2, 0, 0], fingers: [1, 2, 3, 4, 1, 1] },
                 { rStr: 5, frets: ['x', 0, 2, 2, 3, 0], fingers: ['x', 1, 2, 3, 4, 1] },
                 { rStr: 4, frets: ['x', 'x', 0, 2, 3, 3], fingers: ['x', 'x', 1, 2, 3, 4] }
             ],
@@ -310,7 +311,7 @@
                 { rStr: 4, frets: ['x', 'x', 0, 2, 3, 'x'], fingers: ['x', 'x', 1, 3, 4, 'x'] }
             ],
             "mMaj7": [
-                { rStr: 6, frets: [0, 'x', 1, 0, 0, 'x'], fingers: [1, 'x', 3, 1, 2, 'x'] },
+                { rStr: 6, frets: [0, 'x', 1, 0, 0, 'x'], fingers: [1, 'x', 3, 1, 1, 'x'] },
                 { rStr: 5, frets: ['x', 0, 1, 1, 1, 0], fingers: ['x', 1, 2, 3, 4, 1] }
             ],
             "m7b5": [
@@ -320,7 +321,7 @@
             "dim7": [
                 { rStr: 6, frets: [0, 'x', -1, 0, -1, 'x'], fingers: [2, 'x', 1, 4, 1, 'x'] },
                 { rStr: 5, frets: ['x', 0, 1, -1, 1, 'x'], fingers: ['x', 2, 3, 1, 4, 'x'] },
-                { rStr: 4, frets: ['x', 'x', 0, 1, 2, 1], fingers: ['x', 'x', 1, 2, 3, 1] }
+                { rStr: 4, frets: ['x', 'x', 0, 1, 2, 1], fingers: ['x', 'x', 1, 2, 4, 3] }
             ],
             "aug7": [
                 { rStr: 6, frets: [0, 'x', 0, 1, 1, 'x'], fingers: [1, 'x', 1, 2, 3, 'x'] },
@@ -335,7 +336,7 @@
                 { rStr: 5, frets: ['x', 0, -2, -1, -2, 'x'], fingers: ['x', 3, 1, 2, 1, 'x'] }
             ],
             "add9": [
-                { rStr: 6, frets: [0, 2, 4, 1, 0, 0], fingers: [1, 2, 4, 1, 1, 1] },
+                { rStr: 6, frets: [0, 2, 4, 1, 0, 0], fingers: [1, 3, 4, 2, 1, 1] }, 
                 { rStr: 5, frets: ['x', 0, 2, 4, 2, 0], fingers: ['x', 1, 2, 4, 3, 1] }
             ],
             "6/9": [
@@ -343,11 +344,11 @@
                 { rStr: 5, frets: ['x', 0, -1, 0, 0, 'x'], fingers: ['x', 2, 1, 3, 4, 'x'] }
             ],
             "9": [
-                { rStr: 6, frets: [0, 'x', 0, 1, 0, 0], fingers: [2, 'x', 1, 3, 3, 3] },
+                { rStr: 6, frets: [0, 'x', 0, 1, 0, 0], fingers: [1, 'x', 1, 2, 1, 1] },
                 { rStr: 5, frets: ['x', 0, -1, 0, 0, 0], fingers: ['x', 2, 1, 3, 3, 3] }
             ],
             "maj9": [
-                { rStr: 6, frets: [0, 'x', 1, 1, 0, 0], fingers: [1, 'x', 3, 4, 2, 2] },
+                { rStr: 6, frets: [0, 'x', 1, 1, 0, 0], fingers: [1, 'x', 2, 3, 1, 1] },
                 { rStr: 5, frets: ['x', 0, -1, 1, 0, 'x'], fingers: ['x', 2, 1, 4, 3, 'x'] }
             ],
             "m9": [
@@ -358,7 +359,7 @@
                 { rStr: 5, frets: ['x', 0, -1, 0, -2, 'x'], fingers: ['x', 3, 2, 4, 1, 'x'] }
             ],
             "13": [
-                { rStr: 6, frets: [0, 'x', 0, 1, 0, 0], fingers: [1, 'x', 1, 3, 2, 4] },
+                { rStr: 6, frets: [0, 'x', 0, 1, 0, 0], fingers: [1, 'x', 1, 3, 1, 4] },
                 { rStr: 5, frets: ['x', 0, -1, 0, 0, 2], fingers: ['x', 2, 1, 3, 4, 4] }
             ],
             "7b5": [
@@ -528,35 +529,11 @@
                 svg.appendChild(textoFret);
             }
 
-            // FUNCIÓN SEPARADORA: Define cómo se ven los dedos según si es un acorde abierto o movible
-            function obtenerDedo(strIdx, dataObj) {
-                let trasteTeo = dataObj.fretOriginales[strIdx];
-                let dedoReal = dataObj.fingers[strIdx];
-                
-                if (dataObj.esAlAire) {
-                    let openMap = {
-                        "['x',3,2,0,1,0]": ['x',3,2,'x',1,'x'], // C Mayor Abierto
-                        "[3,2,0,0,0,3]": [3,2,'x','x','x',4],   // G Mayor Abierto
-                        "['x',3,2,3,1,0]": ['x',3,2,4,1,'x'],   // C7 Abierto
-                        "['x',3,2,0,0,0]": ['x',3,2,'x','x','x'] // Cmaj7 Abierto
-                    };
-                    let key = JSON.stringify(dataObj.fretOriginales).replace(/\s/g, '');
-                    if (openMap[key]) {
-                        dedoReal = openMap[key][strIdx];
-                    } else if (trasteTeo === 0) {
-                        dedoReal = 'x'; 
-                    }
-                }
-                // ¡REGLA INTRUSIVA ELIMINADA ACÁ!
-                // Ahora respeta absolutamente todos los dedos marcados en tu DICCIONARIO
-                return dedoReal;
-            }
-
             let barres = {};
             trastes.forEach((trasteVal, strIdx) => {
                 if(trasteVal !== 'x' && trasteVal > 0) {
                     let relativeFret = trasteVal - startFret;
-                    let dedoReal = obtenerDedo(strIdx, data);
+                    let dedoReal = data.fingers[strIdx];
 
                     if(dedoReal !== 'x' && dedoReal !== undefined) {
                         let key = relativeFret + "_" + dedoReal;
@@ -609,7 +586,7 @@
                     let relativeFret = trasteVal - startFret;
                     let y = (relativeFret * fretHeight) + (fretHeight / 2);
                     
-                    let dedoReal = obtenerDedo(index, data);
+                    let dedoReal = data.fingers[index];
 
                     let strIsInBarre = false;
                     let isFirstInBarre = false;
