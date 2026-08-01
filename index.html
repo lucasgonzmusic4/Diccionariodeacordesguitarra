@@ -44,9 +44,6 @@
         .btn-fucsia { color: #ff00ff; border-color: rgba(255, 0, 255, 0.5); box-shadow: 0 4px 15px rgba(255, 0, 255, 0.1); }
         .btn-fucsia:active { background-color: #ff00ff; color: #000; box-shadow: 0 0 25px rgba(255, 0, 255, 0.6); }
 
-        .btn-instalar { background-color: #00f3ff; color: #000; border: none; box-shadow: 0 0 20px rgba(0, 243, 255, 0.5); display: block; margin-top: 20px; transition: 0.5s;}
-        .btn-instalar:active { background-color: #ffffff; }
-
         .input-cyber {
             width: 90%; max-width: 420px; padding: 15px;
             background-color: #0d0d0d; color: #fff; border: 1px solid #333;
@@ -77,8 +74,6 @@
     <div id="pantalla-login" class="pantalla activa">
         <h1>DICCIONARIO<span>DE ACORDES</span></h1>
         
-        <button id="btn-instalar-app" class="btn-principal btn-instalar" onclick="forzarInstalacion()">📲 PROBAR INSTALACIÓN</button>
-
         <div style="margin-top: 20px; width: 100%; display: flex; flex-direction: column; align-items: center;">
             <p style="color: #777; width: 90%; max-width: 420px; text-align: center; margin-bottom: 20px;">
                 Ingresá tu correo para validar tu licencia vitalicia.
@@ -150,32 +145,8 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE DIAGNÓSTICO E INSTALACIÓN PWA -->
+    <!-- SCRIPT PWA Y SERVICE WORKER -->
     <script>
-        let disparadorInstalacion = null;
-        const btnInstalar = document.getElementById('btn-instalar-app');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            disparadorInstalacion = e;
-            btnInstalar.innerText = "📲 INSTALAR APP AHORA";
-            btnInstalar.style.backgroundColor = "#00ff73"; 
-            btnInstalar.style.boxShadow = "0 0 20px rgba(0, 255, 115, 0.5)";
-        });
-
-        async function forzarInstalacion() {
-            if (!disparadorInstalacion) {
-                alert("Chrome está bloqueando la instalación.\n\nMotivos posibles:\n1. Estás viendo una versión vieja (borrá caché de la página).\n2. Tu archivo icono.png no mide exactamente 512x512 píxeles.\n3. Ya instalaste la app antes.");
-                return;
-            }
-            disparadorInstalacion.prompt();
-            const { outcome } = await disparadorInstalacion.userChoice;
-            if (outcome === 'accepted') {
-                btnInstalar.style.display = 'none'; 
-            }
-            disparadorInstalacion = null;
-        }
-
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime())
@@ -629,3 +600,4 @@
     </script>
 </body>
 </html>
+```eof
