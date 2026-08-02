@@ -1,6 +1,6 @@
 {
-  "name": "Diccionario de Acordes",
-  "short_name": "Acordes",
+  "name": "Diccionario de Acordes Guitarra",
+  "short_name": "Acordes Guitarra",
   "description": "Diccionario profesional de acordes e inversiones.",
   "start_url": "./index.html",
   "scope": "./",
